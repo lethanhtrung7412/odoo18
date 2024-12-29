@@ -1,7 +1,7 @@
-from odoo.tools._vendor import sessions
-from odoo.tools import lazy_property
-from odoo import http
-from odoo.service import security
+from odoo.odoo.tools._vendor import sessions
+from odoo.odoo.tools import lazy_property
+from odoo.odoo import http
+from odoo.odoo.service import security
 import base64
 import json
 import redis
