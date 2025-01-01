@@ -1,7 +1,8 @@
-from odoo.odoo.tools._vendor import sessions
-from odoo.odoo.tools import lazy_property
-from odoo.odoo import http
-from odoo.odoo.service import security
+from odoo.tools._vendor import sessions
+from odoo.tools import lazy_property
+from odoo import http
+from odoo.service import security
+from odoo.tools.config import config
 import base64
 import json
 import redis
@@ -22,7 +23,12 @@ class RedisSessionStore(sessions.SessionStore):
 
     def __init__(self, session_class=None, renew_missing=False):
         super(RedisSessionStore, self).__init__(session_class)
-        self.redis = redis.Redis("localhost", 6379, 0, decode_responses=True)
+        redis_host = config.get('redis_host')
+        redis_port = config.get('redis_port')
+        redis_db_num = config.get('redis_db_num')
+        if not redis_host or not redis_port or not redis_db_num:
+            raise ValueError("No redis configuraiton")
+        self.redis = redis.Redis(redis_host, redis_port, redis_db_num, decode_responses=True)
         self.renew_missing = renew_missing
         self._is_redis_server_running()
 
@@ -63,6 +69,21 @@ class RedisSessionStore(sessions.SessionStore):
             data = {}
 
         return self.session_class(data, sid, False)
+    
+    def delete(self, session):
+        key = self.get_session_key(session.sid)
+        try:
+            self.redis.delete(key)
+        except redis.RedisError as e:
+            pass
+
+    def rotate(self, session, env):
+        self.delete(session)
+        session.sid = self.generate_key()
+        if session.uid and env:
+            session.session_token = security.compute_session_token(session, env)
+        session.should_rotate = False
+        self.save(session)
 
     def is_valid_key(self, key):
         return _base64_urlsafe_re.match(key) is not None 
