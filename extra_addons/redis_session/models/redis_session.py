@@ -11,7 +11,6 @@ import time
 import os
 import re
 from hashlib import sha512
-
 _logger = logging.getLogger(__name__)
 
 SESSION_LIFETIME = 60 * 60 * 24 * 7 # 1 WEEK

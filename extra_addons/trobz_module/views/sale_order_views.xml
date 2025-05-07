@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_order_filter_inherit" model="ir.ui.view">
+        <field name="name">sale.order.filter.commercial.entity</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter" />
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_month']" position="after">
+                <filter name="group_by_commercial_entity" string="Commercial Entity"
+                        context="{'group_by': 'commercial_entity_id'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
